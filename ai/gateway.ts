@@ -66,11 +66,12 @@ export function getModelOptions(
     // Groq models (FREE)
     case Models.GroqLlama31_70B:
       if (!groq) throw new Error('Groq API key is not configured')
-      model = groq('llama-3.1-70b-versatile')
+      // Try llama3-70b-8192 or llama-3.1-70b-versatile
+      model = groq('llama3-70b-8192')
       break
     case Models.GroqLlama31_8B:
       if (!groq) throw new Error('Groq API key is not configured')
-      model = groq('llama-3.1-8b-instant')
+      model = groq('llama3-8b-8192')
       break
     case Models.GroqMixtral8x7B:
       if (!groq) throw new Error('Groq API key is not configured')
