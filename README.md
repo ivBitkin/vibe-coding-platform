@@ -259,6 +259,6 @@ This project is based on Vercel's Vibe Code OSS example. Please refer to the ori
 
 ---
 
-**Live Demo**: [Your Vercel Deployment URL]
+**Live Demo**: [https://vibe-coding-platform-tawny-xi.vercel.app/](https://vibe-coding-platform-tawny-xi.vercel.app/)
 
 **Questions?** Open an issue or reach out!
