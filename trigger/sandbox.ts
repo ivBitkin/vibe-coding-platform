@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk/v4";
 import { Sandbox } from "e2b";
 
 export interface CreateSandboxInput {

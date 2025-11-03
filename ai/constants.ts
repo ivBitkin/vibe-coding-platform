@@ -1,15 +1,26 @@
 export enum Models {
+  // Groq models (FREE tier available!)
+  GroqLlama31_70B = 'groq/llama-3.1-70b-versatile',
+  GroqLlama31_8B = 'groq/llama-3.1-8b-instant',
+  GroqMixtral8x7B = 'groq/mixtral-8x7b-32768',
+  
+  // OpenAI models (paid)
   OpenAIGPT4o = 'openai/gpt-4o',
   OpenAIGPT4Turbo = 'openai/gpt-4-turbo',
   OpenAIGPT35Turbo = 'openai/gpt-3.5-turbo',
   OpenAIGPT5 = 'openai/gpt-5',
 }
 
-// Use GPT-3.5 Turbo as default to reduce costs
-// Change to Models.OpenAIGPT4o if you have sufficient OpenAI credits
-export const DEFAULT_MODEL = Models.OpenAIGPT35Turbo
+// Use Groq by default (FREE tier available!)
+// Falls back to OpenAI if Groq API key is not set
+export const DEFAULT_MODEL = Models.GroqLlama31_70B
 
 export const SUPPORTED_MODELS: string[] = [
+  // Groq models (free)
+  Models.GroqLlama31_70B,
+  Models.GroqLlama31_8B,
+  Models.GroqMixtral8x7B,
+  // OpenAI models (paid)
   Models.OpenAIGPT4o,
   Models.OpenAIGPT4Turbo,
   Models.OpenAIGPT35Turbo,

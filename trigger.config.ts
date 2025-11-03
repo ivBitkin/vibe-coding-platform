@@ -1,7 +1,7 @@
-import type { TriggerConfig } from "@trigger.dev/sdk/v3";
+import type { TriggerConfig } from "@trigger.dev/sdk/v4";
 
 export const config: TriggerConfig = {
-  project: "proj_uqpebbentlpcqbxcrhim",
+  project: process.env.TRIGGER_DEV_PROJECT_ID || "proj_uqpebbentlpcqbxcrhim",
   maxDuration: 300, // 5 minutes max duration
   retries: {
     enabledInDev: true,

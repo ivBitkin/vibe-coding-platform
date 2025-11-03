@@ -25,11 +25,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Bot detected` }, { status: 403 })
   }
 
-  // Check if OpenAI API key is configured
-  if (!process.env.OPENAI_API_KEY) {
+  // Check if any API key is configured
+  if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY) {
     return NextResponse.json(
       {
-        error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your environment variables.',
+        error: 'No API key configured. Please add GROQ_API_KEY (free) or OPENAI_API_KEY to your environment variables. Get a free Groq key at https://console.groq.com/',
       },
       { status: 500 }
     )

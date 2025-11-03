@@ -19,27 +19,30 @@ Replace Vercel's proprietary sandbox with open-source alternatives while maintai
 
 ### New Stack
 - **Frontend**: Next.js 15 + React 19 (unchanged)
-- **AI**: Vercel AI SDK (unchanged)
+- **AI**: Vercel AI SDK with Groq (free) or OpenAI (paid)
 - **Sandbox**: E2B (`e2b` package)
-- **Orchestration**: Trigger.dev (optional, for complex workflows)
+- **Orchestration**: Trigger.dev v4 (workflow orchestration)
+- **API Routes**: `/api/run/start` and `/api/run/stream` for execution
 
 ### Key Changes
 
 | Component | Original | New |
 |-----------|----------|-----|
-| Sandbox Creation | `@vercel/sandbox` | `e2b` |
-| Command Execution | Vercel Sandbox API | E2B Process API |
+| Sandbox Creation | `@vercel/sandbox` | E2B via Trigger.dev workflow |
+| Command Execution | Vercel Sandbox API | Trigger.dev → E2B Process API |
 | File Management | Vercel Files API | E2B Files API |
-| Streaming Logs | Vercel Command Logs | E2B Process Output |
+| Streaming Logs | Vercel Command Logs | Trigger.dev → SSE Stream |
+| API Routes | Direct sandbox calls | `/api/run/start` + `/api/run/stream` |
 
 ## 📦 Prerequisites
 
 - **Node.js**: v20+ (required for E2B and Trigger.dev)
 - **npm**: v8+
 - **Accounts**:
-  - [E2B Account](https://e2b.dev/) - Get API key
+  - [E2B Account](https://e2b.dev/) - Get API key (required)
+  - [Groq Account](https://console.groq.com/) (FREE) - Recommended for AI features
+  - [OpenAI Account](https://platform.openai.com/) (optional, paid) - Alternative for AI features
   - [Trigger.dev Account](https://trigger.dev/) (optional) - For advanced workflows
-  - [OpenAI Account](https://platform.openai.com/) (optional) - For AI features
 
 ## 🚀 Setup Instructions
 
@@ -61,18 +64,46 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```bash
+# Trigger.dev Configuration (REQUIRED)
+# IMPORTANT: Use Production API key from Trigger.dev dashboard
+# Get it from: https://trigger.dev → Your Project → Settings → API Keys
+TRIGGER_DEV_API_KEY=your_trigger_dev_api_key_here
+
+# Optional: Override API base URL (default: https://api.trigger.dev)
+# TRIGGER_DEV_API_BASE=https://api.trigger.dev
+
+# Task/Workflow ID in Trigger.dev (must match task ID in trigger/run-code.ts)
+# Default: "run-code"
+TRIGGER_DEV_TASK_ID=run-code
+
 # E2B Configuration (REQUIRED)
 E2B_API_KEY=your_e2b_api_key_here
 
-# Trigger.dev Configuration (OPTIONAL)
-TRIGGER_SECRET_KEY=your_trigger_dev_secret_key
+# Optional: E2B template ID (e.g., "nodejs-lts", "python3")
+# E2B_TEMPLATE_ID=nodejs-lts
 
-# OpenAI Configuration (OPTIONAL - for AI features)
+# AI Configuration (REQUIRED - at least one)
+# Option 1: Groq API (FREE tier available! Recommended)
+GROQ_API_KEY=your_groq_api_key_here
+
+# Option 2: OpenAI API (Paid - requires billing)
 OPENAI_API_KEY=your_openai_api_key
+
+# AI Gateway (if using AI Gateway instead of direct API)
+# AI_GATEWAY_BASE_URL=https://your-gateway-url.com
+# AI_GATEWAY_API_KEY=your_gateway_api_key
 
 # Next.js
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+#### Get Trigger.dev API Key (REQUIRED):
+1. Go to [https://trigger.dev](https://trigger.dev)
+2. Sign up and create a project
+3. Navigate to **Settings** → **API Keys**
+4. **IMPORTANT**: Copy your **Production API Key** (not Dev key)
+5. Make sure the key matches your Production environment
+6. Paste it in `.env.local` as `TRIGGER_DEV_API_KEY`
 
 #### Get E2B API Key:
 1. Go to [https://e2b.dev](https://e2b.dev)
@@ -80,11 +111,20 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 3. Navigate to **Settings** → **API Keys**
 4. Copy your API key and paste it in `.env.local`
 
-#### Get Trigger.dev API Key (Optional):
-1. Go to [https://trigger.dev](https://trigger.dev)
-2. Sign up and create a project
-3. Navigate to **Settings** → **API Keys**
-4. Copy your **Dev API Key** and paste it in `.env.local`
+#### Get Groq API Key (FREE - Recommended):
+1. Go to [https://console.groq.com](https://console.groq.com)
+2. Sign up and create an account (FREE)
+3. Navigate to **API Keys** section
+4. Click "Create API Key"
+5. Copy your API key and paste it in `.env.local`
+6. **No credit card required!** Groq offers generous free tier with fast inference
+
+#### Get OpenAI API Key (Paid - Alternative):
+1. Go to [https://platform.openai.com](https://platform.openai.com)
+2. Sign up and create an account
+3. Navigate to **API Keys** section
+4. Create a new API key
+5. **Note**: Requires billing information and has usage costs
 
 ### 4. Run Development Server
 
@@ -166,21 +206,41 @@ git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
 
-2. **Deploy on Vercel**:
+2. **Deploy Trigger.dev Workflows**:
+   ```bash
+   # Install Trigger.dev CLI if not already installed
+   npm install -g @trigger.dev/cli
+   
+   # Login to Trigger.dev
+   npx trigger.dev login
+   
+   # Deploy workflows to Production
+   npx trigger.dev deploy
+   ```
+   
+   This will deploy the `run-code` workflow defined in `trigger/run-code.ts` to your Trigger.dev project.
+
+3. **Deploy on Vercel**:
    - Go to [https://vercel.com](https://vercel.com)
    - Import your GitHub repository
    - Add environment variables:
+     - `TRIGGER_DEV_API_KEY` (REQUIRED - Production API key from Trigger.dev)
+     - `TRIGGER_DEV_TASK_ID` (default: "run-code")
      - `E2B_API_KEY` (REQUIRED)
-     - `TRIGGER_SECRET_KEY` (OPTIONAL - if using Trigger.dev)
-     - `OPENAI_API_KEY` (REQUIRED - for AI features)
+     - `GROQ_API_KEY` (RECOMMENDED - FREE tier available!)
+     - `OPENAI_API_KEY` (OPTIONAL - if not using Groq)
+     - `AI_GATEWAY_BASE_URL` (OPTIONAL - if using AI Gateway)
+     - `AI_GATEWAY_API_KEY` (OPTIONAL - if using AI Gateway)
    - Deploy!
    
-   **Important**: Make sure your OpenAI API key has sufficient credits/billing set up. 
-   - The default model is GPT-3.5 Turbo (cheaper option)
-   - If you get "insufficient_quota" errors, check your billing at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
-   - You can switch to GPT-4o in the model dropdown if you have sufficient credits
+   **Important**: 
+   - **CRITICAL**: Use Production API key from Trigger.dev (not Dev key)
+   - Make sure `TRIGGER_DEV_TASK_ID` matches the task ID in `trigger/run-code.ts`
+   - **Recommended**: Use Groq API (FREE, no credit card needed). Get your key at [https://console.groq.com](https://console.groq.com)
+   - The default model is Llama 3.1 70B (Groq - FREE)
+   - If using OpenAI, make sure your API key has sufficient credits/billing set up
 
-3. **Update Environment Variables**:
+4. **Update Environment Variables**:
    - In Vercel dashboard, go to **Settings** → **Environment Variables**
    - Update `NEXT_PUBLIC_APP_URL` to your Vercel deployment URL
 
@@ -199,11 +259,16 @@ git push -u origin main
 - **Flexibility**: Can be used for complex orchestration if needed
 
 ### Implementation Notes
-- **Direct E2B Integration**: For simplicity, most operations call E2B directly
-- **Direct OpenAI Integration**: Uses OpenAI API directly (not Vercel AI Gateway) to avoid credit card requirement
-- **Trigger.dev (Optional)**: Workflows are available in `trigger/sandbox.ts` for advanced use cases
-- **Memory Store**: Command metadata is stored in memory (use Redis for production)
-- **Streaming**: Implemented using Next.js streaming responses
+- **Trigger.dev v4 Integration**: Uses Trigger.dev as the orchestration layer
+  - Main workflow: `trigger/run-code.ts` - executes code in E2B sandbox
+  - API Routes: `/api/run/start` (triggers workflow) and `/api/run/stream` (SSE logs)
+  - HTTP API: Uses Trigger.dev REST API for triggering and polling
+- **E2B Integration**: E2B sandbox executes code via Trigger.dev workflow
+- **Groq AI Integration**: Uses Groq API (FREE tier) as default for AI features - no credit card required!
+- **OpenAI Integration**: Alternative paid option, uses OpenAI API directly (not Vercel AI Gateway)
+- **AI Gateway**: Optional support for AI Gateway via `AI_GATEWAY_BASE_URL` and `AI_GATEWAY_API_KEY`
+- **Streaming**: Server-Sent Events (SSE) for real-time log streaming
+- **Production Ready**: All workflows must be deployed to Trigger.dev Production environment
 
 ## 🔍 Differences from Original
 
@@ -227,11 +292,11 @@ git push -u origin main
 1. **Node Version Warning**: Project requires Node.js v20+, but works with v18 (with warnings)
 2. **Command Tracking**: Command metadata stored in memory (needs Redis for production)
 3. **Real-time Streaming**: Current implementation waits for command completion (can be improved)
-4. **OpenAI Quota Errors**: 
-   - Error: "insufficient_quota" means your OpenAI account has exceeded its quota
-   - Solution: Add billing information at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
-   - The app uses GPT-3.5 Turbo by default (cheaper option)
-   - You can select GPT-4o from the model dropdown if you have sufficient credits
+4. **AI Provider Setup**: 
+   - **Recommended**: Use Groq API (FREE, no credit card needed) - Get key at [https://console.groq.com](https://console.groq.com)
+   - The app uses Llama 3.1 70B (Groq - FREE) by default
+   - If using OpenAI and getting "insufficient_quota" errors: Add billing at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
+   - You can switch between models in the dropdown (Groq models are free, OpenAI models are paid)
 
 ## 🔮 Future Improvements
 
