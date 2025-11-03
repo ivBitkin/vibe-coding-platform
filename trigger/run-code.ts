@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v4";
+import { task } from "@trigger.dev/sdk";
 import { Sandbox } from "e2b";
 
 export interface RunCodeInput {

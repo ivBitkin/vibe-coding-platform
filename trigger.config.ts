@@ -1,4 +1,4 @@
-import type { TriggerConfig } from "@trigger.dev/sdk/v4";
+import type { TriggerConfig } from "@trigger.dev/sdk";
 
 export const config: TriggerConfig = {
   project: process.env.TRIGGER_DEV_PROJECT_ID || "proj_uqpebbentlpcqbxcrhim",
