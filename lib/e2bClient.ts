@@ -21,13 +21,23 @@ export class E2BClient {
     timeout?: number;
     templateId?: string;
   }): Promise<{ sandboxId: string }> {
-    const sandbox = await Sandbox.create({
-      apiKey: this.apiKey,
-      template: options?.templateId || process.env.E2B_TEMPLATE_ID || undefined,
-      metadata: {
-        timeout: String(options?.timeout ?? 600000), // 10 minutes default
-      },
-    });
+    const templateId = options?.templateId || process.env.E2B_TEMPLATE_ID;
+    
+    // E2B API: Sandbox.create(template?, opts)
+    // If template is provided, it's the first parameter
+    const sandbox = templateId
+      ? await Sandbox.create(templateId, {
+          apiKey: this.apiKey,
+          metadata: {
+            timeout: String(options?.timeout ?? 600000), // 10 minutes default
+          },
+        })
+      : await Sandbox.create({
+          apiKey: this.apiKey,
+          metadata: {
+            timeout: String(options?.timeout ?? 600000), // 10 minutes default
+          },
+        });
 
     return {
       sandboxId: sandbox.sandboxId,
