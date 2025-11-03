@@ -170,10 +170,15 @@ git push -u origin main
    - Go to [https://vercel.com](https://vercel.com)
    - Import your GitHub repository
    - Add environment variables:
-     - `E2B_API_KEY`
-     - `TRIGGER_SECRET_KEY` (if using Trigger.dev)
-     - `OPENAI_API_KEY` (if using AI features)
+     - `E2B_API_KEY` (REQUIRED)
+     - `TRIGGER_SECRET_KEY` (OPTIONAL - if using Trigger.dev)
+     - `OPENAI_API_KEY` (REQUIRED - for AI features)
    - Deploy!
+   
+   **Important**: Make sure your OpenAI API key has sufficient credits/billing set up. 
+   - The default model is GPT-3.5 Turbo (cheaper option)
+   - If you get "insufficient_quota" errors, check your billing at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
+   - You can switch to GPT-4o in the model dropdown if you have sufficient credits
 
 3. **Update Environment Variables**:
    - In Vercel dashboard, go to **Settings** → **Environment Variables**
@@ -217,11 +222,16 @@ git push -u origin main
 - **Streaming**: E2B streams are slightly different from Vercel's
 - **File API**: E2B writes files individually, not in batch
 
-## 🐛 Known Issues
+## 🐛 Known Issues & Troubleshooting
 
 1. **Node Version Warning**: Project requires Node.js v20+, but works with v18 (with warnings)
 2. **Command Tracking**: Command metadata stored in memory (needs Redis for production)
 3. **Real-time Streaming**: Current implementation waits for command completion (can be improved)
+4. **OpenAI Quota Errors**: 
+   - Error: "insufficient_quota" means your OpenAI account has exceeded its quota
+   - Solution: Add billing information at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
+   - The app uses GPT-3.5 Turbo by default (cheaper option)
+   - You can select GPT-4o from the model dropdown if you have sufficient credits
 
 ## 🔮 Future Improvements
 

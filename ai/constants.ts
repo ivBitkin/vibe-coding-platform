@@ -5,7 +5,9 @@ export enum Models {
   OpenAIGPT5 = 'openai/gpt-5',
 }
 
-export const DEFAULT_MODEL = Models.OpenAIGPT4o
+// Use GPT-3.5 Turbo as default to reduce costs
+// Change to Models.OpenAIGPT4o if you have sufficient OpenAI credits
+export const DEFAULT_MODEL = Models.OpenAIGPT35Turbo
 
 export const SUPPORTED_MODELS: string[] = [
   Models.OpenAIGPT4o,

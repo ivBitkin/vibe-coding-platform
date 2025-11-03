@@ -4,6 +4,11 @@ import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
+// Check if API key is provided
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('⚠️  OPENAI_API_KEY is not set. AI features will not work.')
+}
+
 // Create OpenAI client with API key from environment
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,

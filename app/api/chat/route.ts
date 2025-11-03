@@ -25,6 +25,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Bot detected` }, { status: 403 })
   }
 
+  // Check if OpenAI API key is configured
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      {
+        error: 'OpenAI API key is not configured. Please add OPENAI_API_KEY to your environment variables.',
+      },
+      { status: 500 }
+    )
+  }
+
   const [models, { messages, modelId = DEFAULT_MODEL, reasoningEffort }] =
     await Promise.all([getAvailableModels(), req.json() as Promise<BodyData>])
 
@@ -66,9 +76,36 @@ export async function POST(req: Request) {
           ),
           stopWhen: stepCountIs(20),
           tools: tools({ modelId, writer }),
-          onError: (error) => {
+          onError: (error: any) => {
             console.error('Error communicating with AI')
             console.error(JSON.stringify(error, null, 2))
+            
+            // Handle specific OpenAI errors
+            if (error?.error?.code === 'insufficient_quota') {
+              writer.writeMessage({
+                type: 'error',
+                error: {
+                  type: 'insufficient_quota',
+                  message: 'OpenAI API quota exceeded. Please check your billing and plan details at https://platform.openai.com/account/billing',
+                },
+              })
+            } else if (error?.error?.code === 'invalid_api_key') {
+              writer.writeMessage({
+                type: 'error',
+                error: {
+                  type: 'invalid_api_key',
+                  message: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable.',
+                },
+              })
+            } else {
+              writer.writeMessage({
+                type: 'error',
+                error: {
+                  type: 'unknown',
+                  message: error?.error?.message || 'An error occurred while communicating with the AI.',
+                },
+              })
+            }
           },
         })
         result.consumeStream()
