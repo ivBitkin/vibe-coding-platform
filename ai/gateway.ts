@@ -35,21 +35,15 @@ export async function getAvailableModels() {
   const models: Array<{ id: string; name: string }> = []
   
   // AI Gateway models (priority - according to requirements)
+  // Note: AI Gateway models are typically accessed by model ID directly
+  // Common models: gpt-4o, gpt-4-turbo, gpt-3.5-turbo, etc.
   if (hasAIGateway && gateway) {
-    try {
-      // Fetch available models from AI Gateway
-      const gatewayModels = await gateway.models.list()
-      if (gatewayModels && gatewayModels.length > 0) {
-        gatewayModels.forEach((model: any) => {
-          models.push({
-            id: `gateway/${model.id}`,
-            name: `${model.name || model.id} (AI Gateway)`,
-          })
-        })
-      }
-    } catch (error) {
-      console.warn('Failed to fetch models from AI Gateway:', error)
-    }
+    // Add common AI Gateway models (can be customized based on your gateway)
+    models.push(
+      { id: 'gateway/gpt-4o', name: 'GPT-4o (AI Gateway)' },
+      { id: 'gateway/gpt-4-turbo', name: 'GPT-4 Turbo (AI Gateway)' },
+      { id: 'gateway/gpt-3.5-turbo', name: 'GPT-3.5 Turbo (AI Gateway)' },
+    )
   }
   
   // Fallback: Groq models if AI Gateway not available
