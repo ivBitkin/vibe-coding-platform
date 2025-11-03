@@ -116,13 +116,16 @@ export function getModelOptions(
       } else if (openai) {
         // Try to use model directly, or fallback to gpt-3.5-turbo
         const cleanModelId = modelId.replace(/^(gateway\/|openai\/)/, '')
-        try {
-          // Try exact model name
-          model = openai(cleanModelId)
-        } catch {
-          // Fallback to gpt-3.5-turbo if model not found
-          model = openai('gpt-3.5-turbo')
+        
+        // Map common model names to OpenAI API names
+        let openaiModelName = cleanModelId
+        if (cleanModelId === 'gpt-4-turbo') {
+          // Try different GPT-4 Turbo variants
+          openaiModelName = 'gpt-4-turbo-preview' // Fallback to preview version
         }
+        
+        // Try to create model (will fail at runtime if model doesn't exist)
+        model = openai(openaiModelName)
       } else {
         throw new Error('No AI provider configured. Please set AI_GATEWAY_BASE_URL + AI_GATEWAY_API_KEY, or OPENAI_API_KEY')
       }
