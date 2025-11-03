@@ -88,6 +88,7 @@ export function getModelOptions(
       break
     case Models.OpenAIGPT4Turbo:
       if (!openai) throw new Error('OpenAI API key is not configured')
+      // Use gpt-4-turbo (correct model name as of 2024)
       model = openai('gpt-4-turbo')
       break
     case Models.OpenAIGPT35Turbo:
@@ -109,10 +110,19 @@ export function getModelOptions(
     default:
       // Default: AI Gateway > OpenAI
       if (gateway && hasAIGateway) {
-        // Try to use model from gateway
-        model = gateway(modelId)
+        // Try to use model from gateway (remove prefix if present)
+        const cleanModelId = modelId.replace(/^(gateway\/|openai\/)/, '')
+        model = gateway(cleanModelId)
       } else if (openai) {
-        model = openai('gpt-3.5-turbo')
+        // Try to use model directly, or fallback to gpt-3.5-turbo
+        const cleanModelId = modelId.replace(/^(gateway\/|openai\/)/, '')
+        try {
+          // Try exact model name
+          model = openai(cleanModelId)
+        } catch {
+          // Fallback to gpt-3.5-turbo if model not found
+          model = openai('gpt-3.5-turbo')
+        }
       } else {
         throw new Error('No AI provider configured. Please set AI_GATEWAY_BASE_URL + AI_GATEWAY_API_KEY, or OPENAI_API_KEY')
       }
