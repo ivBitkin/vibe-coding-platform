@@ -1,7 +1,7 @@
 export enum Models {
   // Groq models (FREE tier available!)
-  GroqLlama31_70B = 'groq/llama-3.1-70b-versatile',
-  GroqLlama31_8B = 'groq/llama-3.1-8b-instant',
+  GroqLlama31_70B = 'groq/llama3-70b-8192',
+  GroqLlama31_8B = 'groq/llama3-8b-8192',
   GroqMixtral8x7B = 'groq/mixtral-8x7b-32768',
   
   // OpenAI models (paid)
