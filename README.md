@@ -195,6 +195,7 @@ git push -u origin main
 
 ### Implementation Notes
 - **Direct E2B Integration**: For simplicity, most operations call E2B directly
+- **Direct OpenAI Integration**: Uses OpenAI API directly (not Vercel AI Gateway) to avoid credit card requirement
 - **Trigger.dev (Optional)**: Workflows are available in `trigger/sandbox.ts` for advanced use cases
 - **Memory Store**: Command metadata is stored in memory (use Redis for production)
 - **Streaming**: Implemented using Next.js streaming responses

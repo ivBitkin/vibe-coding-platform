@@ -1,13 +1,21 @@
-import { createGatewayProvider } from '@ai-sdk/gateway'
+import { createOpenAI } from '@ai-sdk/openai'
 import { Models } from './constants'
 import type { JSONValue } from 'ai'
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { LanguageModelV2 } from '@ai-sdk/provider'
 
+// Create OpenAI client with API key from environment
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
 export async function getAvailableModels() {
-  const gateway = gatewayInstance()
-  const response = await gateway.getAvailableModels()
-  return response.models.map((model) => ({ id: model.id, name: model.name }))
+  // Return available OpenAI models
+  return [
+    { id: Models.OpenAIGPT4o, name: 'GPT-4o' },
+    { id: Models.OpenAIGPT4Turbo, name: 'GPT-4 Turbo' },
+    { id: Models.OpenAIGPT35Turbo, name: 'GPT-3.5 Turbo' },
+  ]
 }
 
 export interface ModelOptions {
@@ -20,43 +28,36 @@ export function getModelOptions(
   modelId: string,
   options?: { reasoningEffort?: 'minimal' | 'low' | 'medium' }
 ): ModelOptions {
-  const gateway = gatewayInstance()
-  if (modelId === Models.OpenAIGPT5) {
-    return {
-      model: gateway(modelId),
-      providerOptions: {
-        openai: {
-          include: ['reasoning.encrypted_content'],
-          reasoningEffort: options?.reasoningEffort ?? 'low',
-          reasoningSummary: 'auto',
-          serviceTier: 'priority',
-        } satisfies OpenAIResponsesProviderOptions,
-      },
-    }
-  }
-
-  if (
-    modelId === Models.AnthropicClaude4Sonnet ||
-    modelId === Models.AnthropicClaude45Sonnet
-  ) {
-    return {
-      model: gateway(modelId),
-      headers: { 'anthropic-beta': 'fine-grained-tool-streaming-2025-05-14' },
-      providerOptions: {
-        anthropic: {
-          cacheControl: { type: 'ephemeral' },
-        },
-      },
-    }
+  // Map model IDs to OpenAI models
+  let model: LanguageModelV2
+  
+  switch (modelId) {
+    case Models.OpenAIGPT4o:
+      model = openai('gpt-4o')
+      break
+    case Models.OpenAIGPT4Turbo:
+      model = openai('gpt-4-turbo')
+      break
+    case Models.OpenAIGPT35Turbo:
+      model = openai('gpt-3.5-turbo')
+      break
+    case Models.OpenAIGPT5:
+      // Fallback to GPT-4o if GPT-5 not available
+      model = openai('gpt-4o')
+      break
+    default:
+      // Default to GPT-4o
+      model = openai('gpt-4o')
   }
 
   return {
-    model: gateway(modelId),
+    model,
+    providerOptions: {
+      openai: {
+        ...(options?.reasoningEffort && {
+          reasoningEffort: options.reasoningEffort,
+        }),
+      } satisfies Partial<OpenAIResponsesProviderOptions>,
+    },
   }
-}
-
-function gatewayInstance() {
-  return createGatewayProvider({
-    baseURL: process.env.AI_GATEWAY_BASE_URL,
-  })
 }
