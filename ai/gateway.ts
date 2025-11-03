@@ -8,7 +8,14 @@ export async function getAvailableModels() {
   const gateway = gatewayInstance()
   try {
     const response = await gateway.getAvailableModels()
-    return response.models.map((model) => ({ id: model.id, name: model.name }))
+    // Normalize model IDs: remove gateway/ prefix if present, keep original IDs for compatibility
+    return response.models.map((model) => {
+      const normalizedId = model.id.replace(/^gateway\//, '')
+      return { 
+        id: normalizedId, // Use normalized ID (without prefix)
+        name: model.name 
+      }
+    })
   } catch (error) {
     console.error('Failed to fetch models from AI Gateway:', error)
     // Fallback to static list if API call fails

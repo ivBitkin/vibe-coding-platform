@@ -38,10 +38,16 @@ export async function POST(req: Request) {
   const [models, { messages, modelId = DEFAULT_MODEL, reasoningEffort }] =
     await Promise.all([getAvailableModels(), req.json() as Promise<BodyData>])
 
-  const model = models.find((model) => model.id === modelId)
+  // Normalize modelId: remove gateway/ prefix if present for comparison
+  const normalizedModelId = modelId.replace(/^gateway\//, '')
+  const model = models.find((model) => {
+    const normalizedModelIdFromList = model.id.replace(/^gateway\//, '')
+    return normalizedModelIdFromList === normalizedModelId
+  })
+  
   if (!model) {
     return NextResponse.json(
-      { error: `Model ${modelId} not found.` },
+      { error: `Model ${modelId} not found. Available models: ${models.map(m => m.id).join(', ')}` },
       { status: 400 }
     )
   }
@@ -50,8 +56,10 @@ export async function POST(req: Request) {
     stream: createUIMessageStream({
       originalMessages: messages,
       execute: ({ writer }) => {
+        // Use normalized modelId (remove gateway/ prefix if present)
+        const normalizedModelId = modelId.replace(/^gateway\//, '')
         const result = streamText({
-          ...getModelOptions(modelId, { reasoningEffort }),
+          ...getModelOptions(normalizedModelId, { reasoningEffort }),
           system: prompt,
           messages: convertToModelMessages(
             messages.map((message) => {
