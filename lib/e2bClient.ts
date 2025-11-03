@@ -72,9 +72,10 @@ export class E2BClient {
   }> {
     const sandbox = await this.connectSandbox(sandboxId);
     
+    const args = options?.args || [];
     const fullCommand = options?.sudo 
-      ? `sudo ${command} ${(options.args || []).join(' ')}`
-      : `${command} ${(options.args || []).join(' ')}`;
+      ? `sudo ${command} ${args.join(' ')}`
+      : `${command} ${args.join(' ')}`;
 
     const result = await sandbox.commands.run(fullCommand);
 
