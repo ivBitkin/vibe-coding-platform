@@ -26,10 +26,10 @@ export async function POST(req: Request) {
   }
 
   // Check if any API key is configured
-  if (!process.env.GROQ_API_KEY && !process.env.OPENAI_API_KEY) {
+  if (!process.env.AI_GATEWAY_BASE_URL && !process.env.OPENAI_API_KEY) {
     return NextResponse.json(
       {
-        error: 'No API key configured. Please add GROQ_API_KEY (free) or OPENAI_API_KEY to your environment variables. Get a free Groq key at https://console.groq.com/',
+        error: 'No AI provider configured. Please add AI_GATEWAY_BASE_URL + AI_GATEWAY_API_KEY, or OPENAI_API_KEY to your environment variables.',
       },
       { status: 500 }
     )

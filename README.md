@@ -19,7 +19,7 @@ Replace Vercel's proprietary sandbox with open-source alternatives while maintai
 
 ### New Stack
 - **Frontend**: Next.js 15 + React 19 (unchanged)
-- **AI**: Vercel AI SDK with Groq (free) or OpenAI (paid)
+- **AI**: Vercel AI SDK with AI Gateway (primary) or OpenAI (fallback)
 - **Sandbox**: E2B (`e2b` package)
 - **Orchestration**: Trigger.dev v4 (workflow orchestration)
 - **API Routes**: `/api/run/start` and `/api/run/stream` for execution
@@ -40,8 +40,8 @@ Replace Vercel's proprietary sandbox with open-source alternatives while maintai
 - **npm**: v8+
 - **Accounts**:
   - [E2B Account](https://e2b.dev/) - Get API key (required)
-  - [Groq Account](https://console.groq.com/) (FREE) - Recommended for AI features
-  - [OpenAI Account](https://platform.openai.com/) (optional, paid) - Alternative for AI features
+  - AI Gateway - Get API key (required for AI features)
+  - [OpenAI Account](https://platform.openai.com/) (optional, paid) - Fallback for AI features
   - [Trigger.dev Account](https://trigger.dev/) (optional) - For advanced workflows
 
 ## 🚀 Setup Instructions
@@ -83,15 +83,12 @@ E2B_API_KEY=your_e2b_api_key_here
 # E2B_TEMPLATE_ID=nodejs-lts
 
 # AI Configuration (REQUIRED - at least one)
-# Option 1: Groq API (FREE tier available! Recommended)
-GROQ_API_KEY=your_groq_api_key_here
+# Option 1: AI Gateway (REQUIRED - according to requirements)
+AI_GATEWAY_BASE_URL=https://your-gateway-url.com
+AI_GATEWAY_API_KEY=your_gateway_api_key
 
-# Option 2: OpenAI API (Paid - requires billing)
+# Option 2: OpenAI API (Fallback - paid, requires billing)
 OPENAI_API_KEY=your_openai_api_key
-
-# AI Gateway (if using AI Gateway instead of direct API)
-# AI_GATEWAY_BASE_URL=https://your-gateway-url.com
-# AI_GATEWAY_API_KEY=your_gateway_api_key
 
 # Next.js
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -111,15 +108,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 3. Navigate to **Settings** → **API Keys**
 4. Copy your API key and paste it in `.env.local`
 
-#### Get Groq API Key (FREE - Recommended):
-1. Go to [https://console.groq.com](https://console.groq.com)
-2. Sign up and create an account (FREE)
-3. Navigate to **API Keys** section
-4. Click "Create API Key"
-5. Copy your API key and paste it in `.env.local`
-6. **No credit card required!** Groq offers generous free tier with fast inference
+#### Get AI Gateway API Key (REQUIRED):
+1. Configure your AI Gateway service
+2. Get your `AI_GATEWAY_BASE_URL` (e.g., `https://api.your-gateway.com`)
+3. Get your `AI_GATEWAY_API_KEY` from your gateway provider
+4. Add both to `.env.local`
 
-#### Get OpenAI API Key (Paid - Alternative):
+#### Get OpenAI API Key (Fallback - Paid):
 1. Go to [https://platform.openai.com](https://platform.openai.com)
 2. Sign up and create an account
 3. Navigate to **API Keys** section
@@ -227,18 +222,17 @@ git push -u origin main
      - `TRIGGER_DEV_API_KEY` (REQUIRED - Production API key from Trigger.dev)
      - `TRIGGER_DEV_TASK_ID` (default: "run-code")
      - `E2B_API_KEY` (REQUIRED)
-     - `GROQ_API_KEY` (RECOMMENDED - FREE tier available!)
-     - `OPENAI_API_KEY` (OPTIONAL - if not using Groq)
-     - `AI_GATEWAY_BASE_URL` (OPTIONAL - if using AI Gateway)
-     - `AI_GATEWAY_API_KEY` (OPTIONAL - if using AI Gateway)
+     - `AI_GATEWAY_BASE_URL` (REQUIRED - for AI features)
+     - `AI_GATEWAY_API_KEY` (REQUIRED - for AI features)
+     - `OPENAI_API_KEY` (OPTIONAL - fallback if not using AI Gateway)
    - Deploy!
    
    **Important**: 
    - **CRITICAL**: Use Production API key from Trigger.dev (not Dev key)
    - Make sure `TRIGGER_DEV_TASK_ID` matches the task ID in `trigger/run-code.ts`
-   - **Recommended**: Use Groq API (FREE, no credit card needed). Get your key at [https://console.groq.com](https://console.groq.com)
-   - The default model is Llama 3.1 70B (Groq - FREE)
-   - If using OpenAI, make sure your API key has sufficient credits/billing set up
+   - **REQUIRED**: Configure AI Gateway (`AI_GATEWAY_BASE_URL` + `AI_GATEWAY_API_KEY`)
+   - The default model is GPT-4o via AI Gateway
+   - OpenAI is available as fallback if AI Gateway is not configured
 
 4. **Update Environment Variables**:
    - In Vercel dashboard, go to **Settings** → **Environment Variables**
@@ -264,8 +258,8 @@ git push -u origin main
   - API Routes: `/api/run/start` (triggers workflow) and `/api/run/stream` (SSE logs)
   - HTTP API: Uses Trigger.dev REST API for triggering and polling
 - **E2B Integration**: E2B sandbox executes code via Trigger.dev workflow
-- **Groq AI Integration**: Uses Groq API (FREE tier) as default for AI features - no credit card required!
-- **OpenAI Integration**: Alternative paid option, uses OpenAI API directly (not Vercel AI Gateway)
+- **AI Gateway Integration**: Uses AI Gateway as primary provider (per requirements)
+- **OpenAI Integration**: Fallback option, uses OpenAI API directly
 - **AI Gateway**: Optional support for AI Gateway via `AI_GATEWAY_BASE_URL` and `AI_GATEWAY_API_KEY`
 - **Streaming**: Server-Sent Events (SSE) for real-time log streaming
 - **Production Ready**: All workflows must be deployed to Trigger.dev Production environment
@@ -293,10 +287,10 @@ git push -u origin main
 2. **Command Tracking**: Command metadata stored in memory (needs Redis for production)
 3. **Real-time Streaming**: Current implementation waits for command completion (can be improved)
 4. **AI Provider Setup**: 
-   - **Recommended**: Use Groq API (FREE, no credit card needed) - Get key at [https://console.groq.com](https://console.groq.com)
-   - The app uses Llama 3.1 70B (Groq - FREE) by default
+   - **REQUIRED**: Configure AI Gateway (`AI_GATEWAY_BASE_URL` + `AI_GATEWAY_API_KEY`)
+   - The app uses GPT-4o via AI Gateway by default
+   - OpenAI is available as fallback if AI Gateway is not configured
    - If using OpenAI and getting "insufficient_quota" errors: Add billing at [https://platform.openai.com/account/billing](https://platform.openai.com/account/billing)
-   - You can switch between models in the dropdown (Groq models are free, OpenAI models are paid)
 
 ## 🔮 Future Improvements
 
