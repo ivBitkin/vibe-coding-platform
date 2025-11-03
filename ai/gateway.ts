@@ -113,7 +113,7 @@ export function getModelOptions(
     default:
       // Default to Groq if available, otherwise OpenAI
       if (groq) {
-        model = groq('llama-3.1-70b-versatile')
+        model = groq('llama3-70b-8192')
       } else if (openai) {
         model = openai('gpt-3.5-turbo')
       } else {
