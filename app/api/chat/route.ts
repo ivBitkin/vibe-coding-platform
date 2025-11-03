@@ -80,31 +80,13 @@ export async function POST(req: Request) {
             console.error('Error communicating with AI')
             console.error(JSON.stringify(error, null, 2))
             
-            // Handle specific OpenAI errors
+            // Log error details for debugging
+            // Note: onError is called when streamText fails, so we can't write to the stream
+            // The error will be handled by the streamText error handling mechanism
             if (error?.error?.code === 'insufficient_quota') {
-              writer.writeMessage({
-                type: 'error',
-                error: {
-                  type: 'insufficient_quota',
-                  message: 'OpenAI API quota exceeded. Please check your billing and plan details at https://platform.openai.com/account/billing',
-                },
-              })
+              console.error('OpenAI API quota exceeded. Please check your billing and plan details at https://platform.openai.com/account/billing')
             } else if (error?.error?.code === 'invalid_api_key') {
-              writer.writeMessage({
-                type: 'error',
-                error: {
-                  type: 'invalid_api_key',
-                  message: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable.',
-                },
-              })
-            } else {
-              writer.writeMessage({
-                type: 'error',
-                error: {
-                  type: 'unknown',
-                  message: error?.error?.message || 'An error occurred while communicating with the AI.',
-                },
-              })
+              console.error('Invalid API key. Please check your API key environment variable (GROQ_API_KEY or OPENAI_API_KEY).')
             }
           },
         })
